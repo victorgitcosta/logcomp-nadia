@@ -1443,8 +1443,8 @@ class ForAllIntroductiontionDef():
         latex += symbol_table.get_rule(self.reference2.value).toLatex(symbol_table)+ '}'
         return latex
 ######################################################################################################################################################
-# LOGICOMP
-class DeMorgan1Def:
+# LOGCOMP
+""" class DeMorgan1Def:
     """¬(A ∧ B) ⊢ ¬A ∨ ¬B"""
     def __init__(self, line, formula, reference1):
         self.line = line
@@ -1568,6 +1568,69 @@ class DeMorgan4Def:
         if self.formula != expected_formula:
             deduction_result.add_error("A fórmula na linha {} não é ¬(A ∨ B)".format(self.line))
             return
+ """
+ class DeMorganDef:
+    def __init__(self, line, formula, reference1):
+        self.line = line
+        self.formula = formula
+        self.reference1 = reference1
+        self.is_copied = False
+        self.rule_name = "DeMorgan"
+
+    def evaluation(self, parser, deduction_result):
+        before = parser.check_line_reference_before_rule_error(deduction_result, self)
+        if before:
+            parser.check_line_scope_reference_error(deduction_result, self, reference1=True)
+
+        formula1 = parser.symbol_table.lookup_formula_by_line(self.line, self.reference1.value)
+        if formula1 is None:
+            return
+
+        expected_formula = None
+        
+        # --- DeMorgan 1: ¬(A ∧ B) ⊢ ¬A ∨ ¬B ---
+        if isinstance(formula1, NegationFormula) and isinstance(formula1.formula, AndFormula):
+            self.rule_name = "DeMorgan1"
+            A = formula1.formula.left
+            B = formula1.formula.right
+            expected_formula = OrFormula(NegationFormula(A), NegationFormula(B))
+            error_msg = "A fórmula na linha {} não é ¬A ∨ ¬B".format(self.line)
+
+        # --- DeMorgan 2: ¬(A ∨ B) ⊢ ¬A ∧ ¬B ---
+        elif isinstance(formula1, NegationFormula) and isinstance(formula1.formula, OrFormula):
+            self.rule_name = "DeMorgan2"
+            A = formula1.formula.left
+            B = formula1.formula.right
+            expected_formula = AndFormula(NegationFormula(A), NegationFormula(B))
+            error_msg = "A fórmula na linha {} não é ¬A ∧ ¬B".format(self.line)
+
+        # --- DeMorgan 3: ¬A ∨ ¬B ⊢ ¬(A ∧ B) ---
+        elif isinstance(formula1, OrFormula) and (isinstance(formula1.left, NegationFormula) and isinstance(formula1.right, NegationFormula)):
+            self.rule_name = "DeMorgan3"
+            A = formula1.left.formula
+            B = formula1.right.formula
+            # [cite_start]Output should be ¬(A ∧ B) [cite: 9]
+            expected_formula = NegationFormula(AndFormula(A, B))
+            error_msg = "A fórmula na linha {} não é ¬(A ∧ B)".format(self.line)
+
+        # --- DeMorgan 4: ¬A ∧ ¬B ⊢ ¬(A ∨ B) ---
+        elif isinstance(formula1, AndFormula) and (isinstance(formula1.left, NegationFormula) and isinstance(formula1.right, NegationFormula)):
+            self.rule_name = "DeMorgan4"
+            A = formula1.left.formula
+            B = formula1.right.formula
+            expected_formula = NegationFormula(OrFormula(A, B))
+            error_msg = "A fórmula na linha {} não é ¬(A ∨ B)".format(self.line)
+
+        else:
+            deduction_result.add_error("A fórmula referenciada na linha {} não corresponde a nenhuma forma de entrada válida para DeMorgan.".format(self.reference1.value))
+            return
+
+        if self.formula != expected_formula:
+            deduction_result.add_error(error_msg)
+            return
+
+    def toLatex(self, symbol_table):
+        return '\\infer[\\text{' + self.rule_name + '}]{' + self.formula.toLatex() + '}{' + symbol_table.get_rule(self.reference1.value).toLatex(symbol_table) + '}'
 
     def toLatex(self, symbol_table):
         return '\\infer[\\text{DeMorgan4}]{' + self.formula.toLatex() + '}{' + symbol_table.get_rule(self.reference1.value).toLatex(symbol_table) + '}'
@@ -1909,7 +1972,7 @@ class ParserNadia():
                     rule.evaluation(self, deduction_result)
                 
                 ######################################################################################################################################################
-                # LOGICOMP
+                # LOGCOMP
                 elif isinstance(rule, DeMorgan1Def):
                     rule.evaluation(self, deduction_result)
                 elif isinstance(rule, DeMorgan2Def):
@@ -1960,7 +2023,7 @@ class ParserNadia():
             return p[0], formula_result[0]
 
         ######################################################################################################################################################
-        # LOGICOMP
+        # LOGCOMP
         @self.pg.production('step : NUM DOT formula DEMORGAN1 NUM')
         def DeMorgan1(p):
             formula_result = p[2]
