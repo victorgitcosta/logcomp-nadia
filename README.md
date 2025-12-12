@@ -1,3 +1,3 @@
 # logcomp-nadia
 
-Esse projeto constitui em inserir as regras de D'Morgan, Silogismo Disjuntivo e Contrapositiva no código do Nadia. 
+Esse projeto constitui em inserir as regras de D'Morgan, Silogismo Disjuntivo e Contrapositiva no código do Nadia. Esse projeto constitui parte da avaliação da N2 da cadeira de Lógica para Computação do semestre 2025.02, ministrada pelo prof. Thiago Alves, do IFCE Maracanaú. Tivemos como referência teórica o artigo Classical Natural Deduction - 2005. Para auxiliar a execução da tarefa, tivemos como referência o trabalho prévio do aluno Matheus Castelo Branco, e para incrementar no trabalho realizado por ele, refatoramos o código para que seja uma única classe D'Morgan que trate separadamente as 4 variações apresentadas no artigo.
